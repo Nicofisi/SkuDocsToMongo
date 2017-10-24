@@ -67,9 +67,6 @@ object Converter extends App {
       val desc = normalize(e.select("div.card-content.black-text").first().text())
       val exampleDivs = e.select("div.example").asScala
       val examples = exampleDivs.map(div => {
-        if (div.select("div.examples").first() == null) {
-          println(exampleDivs)
-        }
         val content = normalize(div.select("div.examples").first().html())
         val votes = div.select("span[style=\"display:block; line-height: 20px; font-size: 20px\"]").first().text().toInt
         immutable.Document("content" -> content, "votes" -> votes)
