@@ -5,6 +5,11 @@ Tested using:
 * Scala 2.12.3
 * SBT 1.0.2
 
+Usage:
+* Install Java 8 JDK
+* Install SBT (it downloads Scala automatically/has it included)
+* Command: `sbt run`
+
 An example console result:
 ```
 Dropped collection: addons; in database: docs
