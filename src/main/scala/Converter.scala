@@ -40,8 +40,9 @@ object Converter extends App {
   def normalize(text: String): String = {
     StringEscapeUtils.unescapeHtml4(
       Jsoup.clean(text, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false)))
+      // Does these methods above even do anything.. I have to add a ton of additional escapes
       .replaceAll("\\\\\\\\", "xxescapedslashxx")
-      .replaceAll("&lt;", "<") // Does these methods above even do anything.. I have to add a ton of additional escapes
+      .replaceAll("&lt;", "<")
       .replaceAll("&gt;", ">")
       .replaceAll("\\\\'", "'")
       .replaceAll("\\\\n", "\n")
@@ -53,6 +54,9 @@ object Converter extends App {
     val doc = Jsoup.connect(url).get()
 
     doc.outputSettings(new Document.OutputSettings().prettyPrint(false))
+
+    // <br>s (new lines in html) are ignored, only the text inside tags is read,
+    // so we add an escaped new line to inside of each br tag, so it's <br>\n</br>, and new lines work properly
     doc.select("br").append("\\n")
 
     val loopElements = doc.select("div.doc-item").asScala
