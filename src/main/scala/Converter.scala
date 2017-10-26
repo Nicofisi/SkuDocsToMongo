@@ -2,7 +2,7 @@ import org.apache.commons.lang3.StringEscapeUtils
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.safety.Whitelist
-import org.mongodb.scala.bson.collection.immutable
+import org.mongodb.scala.bson.collection.{mutable, immutable}
 import org.mongodb.scala.{Completed, MongoClient, Observer}
 
 import scala.collection.JavaConverters._
@@ -64,9 +64,10 @@ object Converter extends App {
       val title = e.select("span.card-title").first().text()
       val pattern = e.select("div.pattern").first().text()
       val addon = e.select("a.addon[href^=\"/syntax/search/addon:\"]").first().text()
-      val desc = normalize(e.select("div.card-content.black-text").first().text())
+      val desc = normalize(e.select("div.card-content.black-text").last().text())
       val exampleDivs = e.select("div.example").asScala
-      val examples = exampleDivs.map(div => {
+      val reqPluginOpt = Option(e.select("span.badge").first()).map(_.text())
+      val examples = exampleDivs.filter(_.select("div.examples").first() != null).map(div => {
         val content = normalize(div.select("div.examples").first().html())
         val votes = div.select("span[style=\"display:block; line-height: 20px; font-size: 20px\"]").first().text().toInt
         immutable.Document("content" -> content, "votes" -> votes)
@@ -75,7 +76,7 @@ object Converter extends App {
         // and perhaps don't copy votes from the docs at all, just start with zero score and an empty list,
         // it really depends on what you'd like to use this data for
       })
-      val doc = immutable.Document(
+      val doc = mutable.Document(
         "type" -> syntaxType,
         "title" -> title,
         "pattern" -> pattern,
@@ -83,7 +84,8 @@ object Converter extends App {
         "addon" -> addon,
         "examples" -> examples
       )
-      elements += doc
+      if (reqPluginOpt.nonEmpty) doc += ("reqPlugin" -> reqPluginOpt.get)
+      elements += immutable.Document(doc.toBsonDocument)
       if (!addons.exists(_.name == addon)) {
         val style = e.select("div.row.card-content.white-text").first().attr("style")
         val rgbIndex = style.indexOf("rgb")
