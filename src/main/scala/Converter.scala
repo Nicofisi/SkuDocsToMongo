@@ -40,7 +40,7 @@ object Converter extends App {
   def normalize(text: String): String = {
     StringEscapeUtils.unescapeHtml4(
       Jsoup.clean(text, "", Whitelist.none(), new Document.OutputSettings().prettyPrint(false)))
-      // Does these methods above even do anything.. I have to add a ton of additional escapes
+      // Do these methods above even do anything.. I have to add a ton of additional escapes
       .replaceAll("\\\\\\\\", "xxescapedslashxx")
       .replaceAll("&lt;", "<")
       .replaceAll("&gt;", ">")
